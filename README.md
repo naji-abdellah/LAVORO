@@ -75,8 +75,7 @@ LAVORO/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/
-naji-abdellah/LAVORO.git
+   git clone https://github.com/naji-abdellah/LAVORO.git
    cd LAVORO
    ```
 

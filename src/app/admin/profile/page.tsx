@@ -19,7 +19,7 @@ export default function AdminProfilePage() {
 
     // Handle photo update
     const handlePhotoChange = async (url: string | null) => {
-        setCurrentPhotoUrl(url);
+        setCurrentPhotoUrl(url ?? null);
         // Photo upload component usually handles the upload, but if we need to sync state:
         // Already handled by PhotoUpload calling an API and returning the URL.
         // If we need to update the auth context or refetch user, that might be needed.

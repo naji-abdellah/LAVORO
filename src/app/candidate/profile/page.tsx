@@ -67,8 +67,8 @@ export default function CandidateProfilePage() {
         }
     }, [isAuthenticated, authLoading]);
 
-    const handlePhotoChange = async (url: string) => {
-        setCurrentPhotoUrl(url);
+    const handlePhotoChange = async (url: string | null) => {
+        setCurrentPhotoUrl(url ?? null);
         try {
             console.log("Saving photo, data length:", url.length);
             const res = await profileApi.updateProfile({ photoUrl: url });

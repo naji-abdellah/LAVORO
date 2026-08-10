@@ -51,8 +51,8 @@ export default function CandidateProfilePage() {
                     skills: Array.isArray(skills) ? skills.join(", ") : skills,
                 });
 
-                setCurrentCvUrl(profile.cvUrl || null);
-                setCurrentPhotoUrl(profile.photoUrl || null);
+                setCurrentCvUrl(profile.cvUrl ?? null);
+                setCurrentPhotoUrl(profile.photoUrl ?? null);
 
             } catch (err) {
                 console.error("Failed to fetch data", err);

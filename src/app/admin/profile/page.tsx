@@ -13,7 +13,7 @@ export default function AdminProfilePage() {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            setCurrentPhotoUrl(user.photoUrl);
+            setCurrentPhotoUrl(user.photoUrl ?? null);
         }
     }, [isAuthenticated, user]);
 

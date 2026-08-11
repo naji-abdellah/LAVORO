@@ -17,7 +17,7 @@ import {
     Loader2
 } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/job-recruitment-api/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 interface JobDetails {
     id: string;
@@ -29,12 +29,22 @@ interface JobDetails {
     location: string;
     status: string;
     createdAt: string;
-    applicationCount: number;
-    companyName: string;
-    companyDescription: string | null;
-    companyIndustry: string | null;
-    companyLocation: string | null;
-    companyLogoUrl: string | null;
+    applicationCount?: number;
+    companyName?: string;
+    companyDescription?: string | null;
+    companyIndustry?: string | null;
+    companyLocation?: string | null;
+    companyLogoUrl?: string | null;
+    enterprise?: {
+        companyName?: string;
+        description?: string | null;
+        industry?: string | null;
+        location?: string | null;
+        logoUrl?: string | null;
+    };
+    _count?: {
+        applications?: number;
+    };
 }
 
 export default function JobDetailsPage() {
@@ -67,7 +77,6 @@ export default function JobDetailsPage() {
         }
     }, [jobId]);
 
-    // Parse requirements - could be JSON array or comma-separated string
     const parseRequirements = (req: string): string[] => {
         if (!req) return [];
         try {
@@ -75,17 +84,20 @@ export default function JobDetailsPage() {
             if (Array.isArray(parsed)) return parsed;
             return [req];
         } catch {
-            // Comma-separated string
             return req.split(',').map(s => s.trim()).filter(Boolean);
         }
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+        try {
+            return new Date(dateStr).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+        } catch {
+            return dateStr || "Recently";
+        }
     };
 
     if (loading) {
@@ -124,6 +136,12 @@ export default function JobDetailsPage() {
         );
     }
 
+    const companyName = job.companyName || job.enterprise?.companyName || 'Enterprise';
+    const companyLogoUrl = job.companyLogoUrl || job.enterprise?.logoUrl || null;
+    const companyDescription = job.companyDescription || job.enterprise?.description || null;
+    const companyIndustry = job.companyIndustry || job.enterprise?.industry || null;
+    const companyLocation = job.companyLocation || job.enterprise?.location || job.location;
+    const applicationCount = job.applicationCount ?? job._count?.applications ?? 0;
     const requirements = parseRequirements(job.requirements);
 
     return (
@@ -146,11 +164,11 @@ export default function JobDetailsPage() {
                         <div className="flex flex-col md:flex-row md:items-start gap-6">
                             {/* Company Logo */}
                             <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                                {job.companyLogoUrl ? (
+                                {companyLogoUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
-                                        src={job.companyLogoUrl}
-                                        alt={job.companyName}
+                                        src={companyLogoUrl}
+                                        alt={companyName}
                                         className="w-14 h-14 rounded-xl object-cover"
                                     />
                                 ) : (
@@ -180,7 +198,7 @@ export default function JobDetailsPage() {
                                 <div className="flex flex-wrap items-center gap-4 text-gray-600">
                                     <span className="flex items-center gap-2">
                                         <Building2 className="w-5 h-5 text-gray-400" />
-                                        {job.companyName}
+                                        {companyName}
                                     </span>
                                     <span className="flex items-center gap-2">
                                         <MapPin className="w-5 h-5 text-gray-400" />
@@ -194,7 +212,7 @@ export default function JobDetailsPage() {
                                     )}
                                     <span className="flex items-center gap-2">
                                         <Users className="w-5 h-5 text-gray-400" />
-                                        {job.applicationCount} applicant{job.applicationCount !== 1 ? "s" : ""}
+                                        {applicationCount} applicant{applicationCount !== 1 ? "s" : ""}
                                     </span>
                                 </div>
                             </div>
@@ -251,23 +269,23 @@ export default function JobDetailsPage() {
                     <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-purple-600" />
-                            About {job.companyName}
+                            About {companyName}
                         </h2>
                         <div className="space-y-4">
-                            {job.companyIndustry && (
+                            {companyIndustry && (
                                 <div className="flex items-center gap-3 text-gray-600">
                                     <span className="font-medium">Industry:</span>
-                                    <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{job.companyIndustry}</span>
+                                    <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{companyIndustry}</span>
                                 </div>
                             )}
-                            {job.companyLocation && (
+                            {companyLocation && (
                                 <div className="flex items-center gap-3 text-gray-600">
                                     <MapPin className="w-5 h-5 text-gray-400" />
-                                    <span>{job.companyLocation}</span>
+                                    <span>{companyLocation}</span>
                                 </div>
                             )}
-                            {job.companyDescription && (
-                                <p className="text-gray-600">{job.companyDescription}</p>
+                            {companyDescription && (
+                                <p className="text-gray-600">{companyDescription}</p>
                             )}
                         </div>
                     </div>

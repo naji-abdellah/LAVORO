@@ -14,14 +14,21 @@ interface Job {
     status: string;
     requirements: string;
     createdAt: string;
-    applicationCount: number;
-    companyName: string;
-    companyLogoUrl: string | null;
-    companyIndustry: string;
-    companyLocation: string;
+    applicationCount?: number;
+    companyName?: string;
+    companyLogoUrl?: string | null;
+    companyIndustry?: string;
+    companyLocation?: string;
+    enterprise?: {
+        companyName?: string;
+        logoUrl?: string | null;
+    };
+    _count?: {
+        applications?: number;
+    };
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/job-recruitment-api/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export default function JobsList({
     initialType = '',
@@ -147,63 +154,70 @@ export default function JobsList({
 
                         {jobs.length > 0 ? (
                             <div className="grid gap-6">
-                                {jobs.map((job) => (
-                                    <div
-                                        key={job.id}
-                                        className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all group"
-                                    >
-                                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                                            <div className="flex items-start gap-4">
-                                                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                    {job.companyLogoUrl ? (
-                                                        <img src={job.companyLogoUrl} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                                                    ) : (
-                                                        <Building2 className="w-7 h-7 text-blue-600" />
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                                        {job.title}
-                                                    </h3>
-                                                    <p className="text-gray-600 mt-1">{job.companyName}</p>
-                                                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
-                                                        <span className="flex items-center gap-1">
-                                                            <MapPin className="w-4 h-4" />
-                                                            {job.location}
-                                                        </span>
-                                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${job.type === "CDI"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : job.type === "CDD"
-                                                                    ? "bg-orange-100 text-orange-700"
-                                                                    : "bg-purple-100 text-purple-700"
-                                                            }`}>
-                                                            {job.type}
-                                                        </span>
-                                                        {job.salary && (
-                                                            <span className="flex items-center gap-1">
-                                                                <Clock className="w-4 h-4" />
-                                                                {job.salary}
-                                                            </span>
+                                {jobs.map((job) => {
+                                    const companyName = job.companyName || job.enterprise?.companyName || 'Enterprise';
+                                    const companyLogoUrl = job.companyLogoUrl || job.enterprise?.logoUrl || null;
+                                    const applicationCount = job.applicationCount ?? job._count?.applications ?? 0;
+
+                                    return (
+                                        <div
+                                            key={job.id}
+                                            className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all group"
+                                        >
+                                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                        {companyLogoUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img src={companyLogoUrl} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                                                        ) : (
+                                                            <Building2 className="w-7 h-7 text-blue-600" />
                                                         )}
-                                                        <span className="text-gray-400">
-                                                            {job.applicationCount} applicant{job.applicationCount !== 1 ? "s" : ""}
-                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                            {job.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 mt-1">{companyName}</p>
+                                                        <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
+                                                            <span className="flex items-center gap-1">
+                                                                <MapPin className="w-4 h-4" />
+                                                                {job.location}
+                                                            </span>
+                                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${job.type === "CDI"
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : job.type === "CDD"
+                                                                        ? "bg-orange-100 text-orange-700"
+                                                                        : "bg-purple-100 text-purple-700"
+                                                                }`}>
+                                                                {job.type}
+                                                            </span>
+                                                            {job.salary && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <Clock className="w-4 h-4" />
+                                                                    {job.salary}
+                                                                </span>
+                                                            )}
+                                                            <span className="text-gray-400">
+                                                                {applicationCount} applicant{applicationCount !== 1 ? "s" : ""}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="flex items-center gap-4 lg:flex-shrink-0">
-                                                <Link
-                                                    href={`/jobs/${job.id}`}
-                                                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
-                                                >
-                                                    View Details
-                                                    <ArrowRight className="w-4 h-4" />
-                                                </Link>
+                                                <div className="flex items-center gap-4 lg:flex-shrink-0">
+                                                    <Link
+                                                        href={`/jobs/${job.id}`}
+                                                        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                                    >
+                                                        View Details
+                                                        <ArrowRight className="w-4 h-4" />
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">

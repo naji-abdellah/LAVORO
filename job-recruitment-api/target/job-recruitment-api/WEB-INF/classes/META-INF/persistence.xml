@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    
+    <persistence-unit name="recruitmentPU" transaction-type="JTA">
+        <jta-data-source>java:jboss/datasources/RecruitmentDS</jta-data-source>
+        
+        <class>com.recruitment.entity.User</class>
+        <class>com.recruitment.entity.CandidateProfile</class>
+        <class>com.recruitment.entity.EnterpriseProfile</class>
+        <class>com.recruitment.entity.JobOffer</class>
+        <class>com.recruitment.entity.Application</class>
+        <class>com.recruitment.entity.Interview</class>
+        <class>com.recruitment.entity.Notification</class>
+        
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.jdbc.time_zone" value="UTC"/>
+            <property name="hibernate.jpa.compliance.query" value="false"/>
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CANDIDATE
+  ENTERPRISE
+}
+
+enum JobType {
+  CDI
+  CDD
+  FREELANCE
+}
+
+enum JobStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  PENDING
+  INTERVIEW_SCHEDULED
+  ACCEPTED
+  REJECTED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  password            String
+  role                Role
+  photoUrl            String?
+  isActive            Boolean  @default(true)
+  deactivationReason  String?  @db.Text
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  candidateProfile  CandidateProfile?
+  enterpriseProfile EnterpriseProfile?
+  notifications     Notification[]
+}
+
+model CandidateProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName String?
+  lastName  String?
+  skills    String   @db.Text // JSON array stored as text
+  bio       String?  @db.Text
+  cvUrl     String?
+  phone     String?
+  address   String?
+
+  applications Application[]
+}
+
+model EnterpriseProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  description String? @db.Text
+  logoUrl     String?
+  industry    String?
+  location    String?
+
+  jobOffers JobOffer[]
+}
+
+model JobOffer {
+  id           String    @id @default(cuid())
+  enterpriseId String
+  enterprise   EnterpriseProfile @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  title        String
+  description  String    @db.Text
+  type         JobType
+  salary       String?
+  location     String
+  status       JobStatus @default(ACTIVE)
+  requirements String    @db.Text // JSON array stored as text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  applications Application[]
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  candidateId   String
+  candidate     CandidateProfile  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobOfferId    String
+  jobOffer      JobOffer          @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus @default(PENDING)
+  matchingScore Float             @default(0)
+  isAnonymous   Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  interview Interview?
+
+  @@unique([candidateId, jobOfferId])
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  applicationId String          @unique
+  application   Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  date          DateTime
+  meetingLink   String
+  status        InterviewStatus @default(SCHEDULED)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
